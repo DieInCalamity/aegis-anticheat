@@ -15,7 +15,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.HashMap;
@@ -29,7 +28,6 @@ public class Aegis extends JavaPlugin implements Listener {
     private SetbackHandler setbackHandler;
     private AlertManager alertManager;
     private final Map<UUID, PlayerData> dataMap = new HashMap<>();
-    private boolean packetEventsEnabled = false;
 
     public static Aegis getInstance() {
         return instance;
@@ -60,14 +58,12 @@ public class Aegis extends JavaPlugin implements Listener {
         setupPacketEvents();
 
         getCommand("aegis").setExecutor(new AegisCommand());
-        getLogger().info("Aegis AntiCheat enabled" + (packetEventsEnabled ? " with PacketEvents." : "."));
+        getLogger().info("Aegis AntiCheat enabled with PacketEvents.");
     }
 
     @Override
     public void onDisable() {
-        if (packetEventsEnabled) {
-            PacketEvents.getAPI().terminate();
-        }
+        PacketEvents.getAPI().terminate();
         getLogger().info("Aegis AntiCheat disabled.");
     }
 
@@ -76,24 +72,9 @@ public class Aegis extends JavaPlugin implements Listener {
     }
 
     private void setupPacketEvents() {
-        Plugin pe = Bukkit.getPluginManager().getPlugin("PacketEvents");
-        if (pe == null) {
-            getLogger().warning("PacketEvents not found — packet‑level checks will be disabled.");
-            return;
-        }
-
-        try {
-            PacketEvents.getAPI().load();
-            PacketEvents.getAPI().init();
-            packetEventsEnabled = true;
-            getLogger().info("Hooked into PacketEvents successfully.");
-        } catch (Exception ex) {
-            getLogger().warning("Failed to initialize PacketEvents: " + ex.getMessage());
-        }
-    }
-
-    public boolean isPacketEventsEnabled() {
-        return packetEventsEnabled;
+        PacketEvents.getAPI().load();
+        PacketEvents.getAPI().init();
+        getLogger().info("Hooked into PacketEvents successfully.");
     }
 
     public ConfigManager getConfigManager() {
