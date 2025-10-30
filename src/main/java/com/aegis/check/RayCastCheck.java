@@ -3,9 +3,9 @@ package com.aegis.check;
 import com.aegis.Aegis;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerAbstract;
-import com.github.retrooper.packetevents.event.impl.PacketPlayUseEntityEvent;
-import com.github.retrooper.packetevents.protocol.entity.type.EntityType;
-import com.github.retrooper.packetevents.protocol.player.User;
+import com.github.retrooper.packetevents.event.PacketReceiveEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packetevents.protocol.player.ClientVersion;
 import com.github.retrooper.packetevents.protocol.world.Location;
 import com.github.retrooper.packetevents.util.Vector3d;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientUseEntity;
@@ -22,41 +22,44 @@ public class RayCastCheck extends CheckBase {
 
         PacketEvents.getAPI().getEventManager().registerListener(new PacketListenerAbstract() {
             @Override
-            public void onPacketPlayUseEntity(PacketPlayUseEntityEvent event) {
-                handle(event);
+            public void onPacketReceive(PacketReceiveEvent event) {
+                if (event.getPacketType() == PacketType.Play.Client.USE_ENTITY) {
+                    handle(event);
+                }
             }
         });
     }
 
-    private void handle(PacketPlayUseEntityEvent event) {
+    private void handle(PacketReceiveEvent event) {
         if (!Aegis.getInstance().getConfigManager().isCheckEnabled(key)) return;
 
-        User user = event.getUser();
-        Player attacker = (Player) user.getPlayer();
+        Player attacker = (Player) event.getPlayer();
         if (attacker == null || Aegis.getInstance().getConfigManager().isExempt(attacker)) return;
 
-        if (event.getEntityType() != EntityType.PLAYER) return;
+        WrapperPlayClientUseEntity wrapper = new WrapperPlayClientUseEntity(event);
+        if (wrapper.getAction() != WrapperPlayClientUseEntity.Action.ATTACK) return;
 
-        WrapperPlayClientUseEntity.Action action = event.getAction();
-        if (action != WrapperPlayClientUseEntity.Action.ATTACK) return;
-
-        Location eyeLoc = user.getLocation();
-        Vector3d direction = user.getPosition().getDirection();
-
-        org.bukkit.entity.Entity victimBukkit = Bukkit.getEntity(event.getEntityId());
+        org.bukkit.entity.Entity victimBukkit = Bukkit.getEntity(wrapper.getEntityId());
         if (!(victimBukkit instanceof Player victim)) return;
 
-        Vector3d victimPos = new Vector3d(
+        Location eyeLoc = new Location(
+                attacker.getWorld().getName(),
+                attacker.getEyeLocation().getX(),
+                attacker.getEyeLocation().getY(),
+                attacker.getEyeLocation().getZ(),
+                attacker.getLocation().getYaw(),
+                attacker.getLocation().getPitch()
+        );
+
+        Vector3d victimCenter = new Vector3d(
                 victim.getLocation().getX(),
                 victim.getLocation().getY() + victim.getHeight() / 2.0,
                 victim.getLocation().getZ()
         );
 
-        double distance = eyeLoc.toVector3d().distance(victimPos);
+        double distance = eyeLoc.getPosition().distance(victimCenter);
 
-        boolean withinReach = distance <= maxReach;
-
-        if (!withinReach) {
+        if (distance > maxReach) {
             fail(attacker, String.format("reach=%.3f max=%.2f", distance, maxReach));
         }
     }
