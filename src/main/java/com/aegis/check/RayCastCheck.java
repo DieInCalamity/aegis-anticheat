@@ -6,12 +6,14 @@ import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
 public class RayCastCheck extends CheckBase {
+
+    private final double maxReach = Aegis.getInstance().getConfigManager()
+            .getDouble("checks.raycast.max_reach", 3.2);
 
     public RayCastCheck() {
         super("raycast");
@@ -29,13 +31,16 @@ public class RayCastCheck extends CheckBase {
                 if (Aegis.getInstance().getConfigManager().isExempt(player)) return;
 
                 WrapperPlayClientInteractEntity wrapper = new WrapperPlayClientInteractEntity(event);
-                int targetId = wrapper.getEntityId();
+                if (wrapper.getAction() != WrapperPlayClientInteractEntity.InteractAction.ATTACK) return;
 
-                Entity target = Bukkit.getEntity(Integer.toUnsignedLong(targetId));
-                if (!(target instanceof Player victim)) return;
+                Entity victimEntity = wrapper.getEntity();
+                if (!(victimEntity instanceof Player victim)) return;
 
-                double reach = player.getEyeLocation().distance(victim.getEyeLocation());
-                double maxReach = Aegis.getInstance().getConfigManager().getDouble("checks.raycast.max_reach", 3.2);
+                Vector victimVelocity = victim.getVelocity();
+                Vector predictedPos = victim.getLocation().toVector().add(victimVelocity);
+
+                Vector attackerEyes = player.getEyeLocation().toVector();
+                double reach = attackerEyes.distance(predictedPos.add(new Vector(0, victim.getHeight() / 2.0, 0)));
 
                 if (reach > maxReach && !player.hasLineOfSight(victim)) {
                     fail(player, String.format("reach=%.2f max=%.2f", reach, maxReach));
