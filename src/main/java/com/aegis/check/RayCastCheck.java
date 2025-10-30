@@ -5,10 +5,8 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
-import com.github.retrooper.packetevents.protocol.player.ClientVersion;
-import com.github.retrooper.packetevents.protocol.world.Location;
 import com.github.retrooper.packetevents.util.Vector3d;
-import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientUseEntity;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -23,7 +21,7 @@ public class RayCastCheck extends CheckBase {
         PacketEvents.getAPI().getEventManager().registerListener(new PacketListenerAbstract() {
             @Override
             public void onPacketReceive(PacketReceiveEvent event) {
-                if (event.getPacketType() == PacketType.Play.Client.USE_ENTITY) {
+                if (event.getPacketType() == PacketType.Play.Client.INTERACT_ENTITY) {
                     handle(event);
                 }
             }
@@ -36,19 +34,16 @@ public class RayCastCheck extends CheckBase {
         Player attacker = (Player) event.getPlayer();
         if (attacker == null || Aegis.getInstance().getConfigManager().isExempt(attacker)) return;
 
-        WrapperPlayClientUseEntity wrapper = new WrapperPlayClientUseEntity(event);
-        if (wrapper.getAction() != WrapperPlayClientUseEntity.Action.ATTACK) return;
+        WrapperPlayClientInteractEntity wrapper = new WrapperPlayClientInteractEntity(event);
+        if (wrapper.getAction() != WrapperPlayClientInteractEntity.InteractAction.ATTACK) return;
 
         org.bukkit.entity.Entity victimBukkit = Bukkit.getEntity(wrapper.getEntityId());
         if (!(victimBukkit instanceof Player victim)) return;
 
-        Location eyeLoc = new Location(
-                attacker.getWorld().getName(),
+        Vector3d attackerEyes = new Vector3d(
                 attacker.getEyeLocation().getX(),
                 attacker.getEyeLocation().getY(),
-                attacker.getEyeLocation().getZ(),
-                attacker.getLocation().getYaw(),
-                attacker.getLocation().getPitch()
+                attacker.getEyeLocation().getZ()
         );
 
         Vector3d victimCenter = new Vector3d(
@@ -57,8 +52,7 @@ public class RayCastCheck extends CheckBase {
                 victim.getLocation().getZ()
         );
 
-        double distance = eyeLoc.getPosition().distance(victimCenter);
-
+        double distance = attackerEyes.distance(victimCenter);
         if (distance > maxReach) {
             fail(attacker, String.format("reach=%.3f max=%.2f", distance, maxReach));
         }
