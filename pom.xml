@@ -5,7 +5,7 @@
 
     <groupId>com.aegis</groupId>
     <artifactId>aegis-anticheat</artifactId>
-    <version>1.0.1-dev4</version>
+    <version>1.0.1-dev5</version>
     <name>Aegis</name>
     <description>Aegis AntiCheat for Paper/Spigot 1.21+</description>
     <url>https://example.com/aegis</url>
