@@ -48,7 +48,7 @@ public class Aegis extends JavaPlugin implements Listener {
         registerCheck(new VerticalMotionCheck());
         registerCheck(new BalanceCheck());
         registerCheck(new NoSlowCheck());
-        registerCheck(new RayCastCheck());
+        new RayCastCheck();
         registerCheck(new FastBreakCheck());
         registerCheck(new AutoClickerCheck());
         registerCheck(new ChatCheck());
