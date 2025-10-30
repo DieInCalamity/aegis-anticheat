@@ -6,7 +6,6 @@ import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
@@ -37,7 +36,7 @@ public class RayCastCheck extends CheckBase {
                 int targetId = wrapper.getEntityId();
 
                 Player victim = null;
-                for (Player online : Bukkit.getOnlinePlayers()) {
+                for (Player online : player.getWorld().getPlayers()) {
                     if (online.getEntityId() == targetId) {
                         victim = online;
                         break;
@@ -52,6 +51,7 @@ public class RayCastCheck extends CheckBase {
 
                 if (reach > maxReach && !player.hasLineOfSight(victim)) {
                     fail(player, String.format("reach=%.2f max=%.2f", reach, maxReach));
+                    event.setCancelled(true);
                 }
             }
         });
