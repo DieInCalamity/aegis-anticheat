@@ -1,0 +1,101 @@
+settings:
+  alerts: true
+  setback_enabled: true
+  exempt:
+    - CREATIVE
+    - SPECTATOR
+    - ELYTRA
+    - BOAT
+    - SLIME_BLOCK
+    - ICE
+
+checks:
+  horizontalmotion:
+    enabled: true
+    max_speed: 0.9 # blocks/tick cap for legit sprint+jump on flat ground is ~0.7-0.8 depending on tickrate
+    ignore_push: true # ignore push from other entities
+    push_expand: 0.3  # hitbox radius for push
+    setback_vl: 10
+    commands:
+      50: 'kick %player% Horizontal Motion'
+
+  verticalmotion:
+    enabled: true
+    max_step_height: 0.65          # Maximum legal step height (Step check)
+    max_jump_height: 1.25          # Maximum jump height (HighJump check)
+    max_climb_speed: 0.35          # Maximum climb speed for spider-like climbing
+    water_grace_ticks: 20          # Ticks to ignore after leaving water or swimming
+    gravity_fall_threshold: -0.05  # Minimum allowed falling speed in air (AntiGravity check)
+    flyup_threshold: 0.01          # Minimum total upward motion in air before Fly/Up check triggers
+    airwalk_dy_threshold: 0.001    # Threshold for detecting AirWalk (staying suspended)
+    air_ticks_min: 5                # Minimum number of air ticks before Fly/AirWalk check triggers
+    groundspoof_max_distance: 1.0  # Max distance from block below player for GroundSpoof check
+    setback_vl: 10
+    commands:
+      30: 'kick %player% Vertical Motion'
+
+  balance:
+    enabled: true
+    max_moves_per_second: 25
+    setback_vl: 3
+    commands:
+      20: 'kick %player% Timer'
+
+  noslow:
+    enabled: true
+    base_speed: 0.7
+    items:
+      min_slow_percent: 0.6 # set to 0 to disable
+    sneak:
+      min_slow_percent: 0.3 # set to 0 to disable
+      grace_ticks: 5 # set to 0 to disable(not recommended)
+    setback_vl: 0
+    commands:
+      15: 'kick %player% NoSlow'
+
+  raycast:
+    enabled: true
+    max_reach: 3.2
+    setback_vl: -1
+    commands:
+      15: 'kick %player% Reach/HitBox'
+
+  fastbreak:
+    enabled: true
+    min_interval_ms: 120 # minimum time between block breaks
+    setback_vl: 10
+    commands:
+      30: 'kick %player% FastBreak'
+
+  autoclicker:
+    enabled: true
+    cps_threshold: 16
+    setback_vl: -1
+    commands:
+      40: 'kick %player% AutoClicker'
+
+  chat:
+    enabled: true
+    detect_sprint_chat: true
+    detect_sprint_command: true
+    invalid_completion: true # requires packetevents
+    setback_vl: -1
+    commands:
+      5: 'kick %player% Chat Exploit'
+
+  badpackets: # this check requires packetevents
+    enabled: true
+    detect_duplicate_slot: true
+    setback_vl: -1
+    commands:
+      5: 'kick %player% BadPackets'
+
+  inventory: # this check requires packetevents
+    enabled: true
+    detect_sprint_inventory: true
+    detect_instant_click: true
+    detect_attack_with_inventory: true
+    detect_fast_close: true
+    setback_vl: -1
+    commands:
+      5: 'kick %player% Inventory Exploit'

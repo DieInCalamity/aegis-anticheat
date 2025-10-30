@@ -1,0 +1,16 @@
+name: Aegis
+main: com.aegis.Aegis
+version: 1.0.1-dev4
+api-version: '1.21'
+author: CalamityCats
+website: https://modrinth.com/
+commands:
+  aegis:
+    description: Aegis AntiCheat command
+    usage: /aegis alerts|reload|vl <player>
+    permission: aegis.command
+permissions:
+  aegis.command:
+    default: op
+softdepend:
+  - packetevents
