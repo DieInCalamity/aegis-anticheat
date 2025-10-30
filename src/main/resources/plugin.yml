@@ -12,5 +12,5 @@ commands:
 permissions:
   aegis.command:
     default: op
-softdepend:
+depend:
   - packetevents
