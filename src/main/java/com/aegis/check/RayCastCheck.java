@@ -6,14 +6,23 @@ import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
+import org.bukkit.FluidCollisionMode;
+import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
+import org.bukkit.RayTraceResult;
 
 public class RayCastCheck extends CheckBase {
 
     private final double maxReach = Aegis.getInstance().getConfigManager()
             .getDouble("checks.raycast.max_reach", 3.2);
+    private final double predictionFactor = Aegis.getInstance().getConfigManager()
+            .getDouble("checks.raycast.prediction_factor", 0.45);
+    private final double leniency = Aegis.getInstance().getConfigManager()
+            .getDouble("checks.raycast.leniency", 0.25);
+    private final double rayEntitySize = Aegis.getInstance().getConfigManager()
+            .getDouble("checks.raycast.ray_entity_size", 0.6);
 
     public RayCastCheck() {
         super("raycast");
@@ -44,14 +53,55 @@ public class RayCastCheck extends CheckBase {
                 }
                 if (victim == null) return;
 
-                Vector victimPredicted = victim.getLocation().toVector().add(victim.getVelocity());
+                Vector predictedCenter = victim.getLocation().toVector()
+                        .add(victim.getVelocity().clone().multiply(predictionFactor))
+                        .add(new Vector(0, (victim.getHeight() > 0 ? victim.getHeight() : 1.8) / 2.0, 0));
 
                 Vector attackerEyes = player.getEyeLocation().toVector();
-                double reach = attackerEyes.distance(victimPredicted.add(new Vector(0, victim.getHeight() / 2.0, 0)));
+                Vector dir = predictedCenter.clone().subtract(attackerEyes);
+                double distance = dir.length();
+                if (distance <= 1e-6) return;
+                Vector dirNorm = dir.clone().normalize();
 
-                if (reach > maxReach && !player.hasLineOfSight(victim)) {
-                    fail(player, String.format("reach=%.2f max=%.2f", reach, maxReach));
-                    event.setCancelled(true);
+                if (distance <= maxReach + leniency) return;
+
+                Location startLoc = player.getEyeLocation();
+                RayTraceResult blockHit = player.getWorld().rayTraceBlocks(
+                        startLoc,
+                        dirNorm,
+                        distance,
+                        FluidCollisionMode.NEVER
+                );
+
+                boolean obstructed = false;
+                if (blockHit != null && blockHit.getHitPosition() != null) {
+                    double blockDist = blockHit.getHitPosition().toVector().distance(attackerEyes);
+                    if (blockDist < distance - 1e-6) obstructed = true;
+                }
+
+                if (obstructed) return;
+
+                RayTraceResult entityHit = player.getWorld().rayTraceEntities(
+                        startLoc,
+                        dirNorm,
+                        distance,
+                        rayEntitySize,
+                        e -> e.getEntityId() == victim.getEntityId()
+                );
+
+                boolean hitVictim = entityHit != null && entityHit.getHitEntity() != null
+                        && entityHit.getHitEntity().getEntityId() == victim.getEntityId();
+
+                if (hitVictim || !hitVictim) {
+                    if (!player.hasLineOfSight(victim)) {
+                        fail(player, String.format("reach=%.2f max=%.2f leniency=%.2f victim=%s",
+                                distance, maxReach, leniency, victim.getName()));
+                        event.setCancelled(true);
+                    } else {
+                        fail(player, String.format("reach=%.2f max=%.2f leniency=%.2f victim=%s (lineOfSight)",
+                                distance, maxReach, leniency, victim.getName()));
+                        event.setCancelled(true);
+                    }
                 }
             }
         });
