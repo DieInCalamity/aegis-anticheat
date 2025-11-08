@@ -14,17 +14,21 @@ import org.bukkit.util.RayTraceResult;
 
 public class RayCastCheck extends CheckBase {
 
-    private final double maxReach = Aegis.getInstance().getConfigManager()
-            .getDouble("checks.raycast.max_reach", 3.2);
-    private final double predictionFactor = Aegis.getInstance().getConfigManager()
-            .getDouble("checks.raycast.prediction_factor", 0.45);
-    private final double leniency = Aegis.getInstance().getConfigManager()
-            .getDouble("checks.raycast.leniency", 0.25);
-    private final double rayEntitySize = Aegis.getInstance().getConfigManager()
-            .getDouble("checks.raycast.ray_entity_size", 0.6);
+    private final double maxReach;
+    private final double predictionFactor;
+    private final double leniency;
+    private final double rayEntitySize;
 
     public RayCastCheck() {
         super("raycast");
+        this.maxReach = Aegis.getInstance().getConfigManager()
+                .getDouble("checks.raycast.max_reach", 3.2);
+        this.predictionFactor = Aegis.getInstance().getConfigManager()
+                .getDouble("checks.raycast.prediction_factor", 0.45);
+        this.leniency = Aegis.getInstance().getConfigManager()
+                .getDouble("checks.raycast.leniency", 0.25);
+        this.rayEntitySize = Aegis.getInstance().getConfigManager()
+                .getDouble("checks.raycast.ray_entity_size", 0.6);
         registerPacketListener();
     }
 
@@ -42,8 +46,8 @@ public class RayCastCheck extends CheckBase {
                 if (wrapper.getAction() != WrapperPlayClientInteractEntity.InteractAction.ATTACK) return;
 
                 int targetId = wrapper.getEntityId();
-
                 Player victim = null;
+
                 for (Player online : player.getWorld().getPlayers()) {
                     if (online.getEntityId() == targetId) {
                         victim = online;
@@ -52,14 +56,18 @@ public class RayCastCheck extends CheckBase {
                 }
                 if (victim == null) return;
 
-                Vector predictedCenter = victim.getLocation().toVector()
-                        .add(victim.getVelocity().clone().multiply(predictionFactor))
-                        .add(new Vector(0, (victim.getHeight() > 0 ? victim.getHeight() : 1.8) / 2.0, 0));
+                Location victimLoc = victim.getLocation();
+                Vector victimVelocity = victim.getVelocity();
+                double victimHeight = victim.getHeight() > 0 ? victim.getHeight() : 1.8;
+
+                Vector predictedCenter = victimLoc.toVector()
+                        .add(victimVelocity.clone().multiply(predictionFactor))
+                        .add(new Vector(0, victimHeight / 2.0, 0));
 
                 Vector attackerEyes = player.getEyeLocation().toVector();
                 Vector dir = predictedCenter.clone().subtract(attackerEyes);
                 double distance = dir.length();
-                if (distance <= 1e-6) return;
+                if (distance < 1e-6) return;
                 Vector dirNorm = dir.clone().normalize();
 
                 if (distance <= maxReach + leniency) return;
@@ -75,9 +83,10 @@ public class RayCastCheck extends CheckBase {
                 boolean obstructed = false;
                 if (blockHit != null && blockHit.getHitPosition() != null) {
                     double blockDist = blockHit.getHitPosition().toVector().distance(attackerEyes);
-                    if (blockDist < distance - 1e-6) obstructed = true;
+                    if (blockDist < distance - 1e-6) {
+                        obstructed = true;
+                    }
                 }
-
                 if (obstructed) return;
 
                 RayTraceResult entityHit = player.getWorld().rayTraceEntities(
@@ -88,19 +97,21 @@ public class RayCastCheck extends CheckBase {
                         e -> e.getEntityId() == victim.getEntityId()
                 );
 
-                boolean hitVictim = entityHit != null && entityHit.getHitEntity() != null
-                        && entityHit.getHitEntity().getEntityId() == victim.getEntityId();
+                boolean hitVictim = entityHit != null &&
+                                     entityHit.getHitEntity() != null &&
+                                     entityHit.getHitEntity().getEntityId() == victim.getEntityId();
 
                 if (!hitVictim) {
                     if (!player.hasLineOfSight(victim)) {
-                        fail(player, String.format("reach=%.2f max=%.2f leniency=%.2f victim=%s",
-                                distance, maxReach, leniency, victim.getName()));
-                        event.setCancelled(true);
+                        fail(player,
+                             String.format("reach=%.2f max=%.2f leniency=%.2f victim=%s",
+                                           distance, maxReach, leniency, victim.getName()));
                     } else {
-                        fail(player, String.format("reach=%.2f max=%.2f leniency=%.2f victim=%s (lineOfSight)",
-                                distance, maxReach, leniency, victim.getName()));
-                        event.setCancelled(true);
+                        fail(player,
+                             String.format("reach=%.2f max=%.2f leniency=%.2f victim=%s (lineOfSight)",
+                                           distance, maxReach, leniency, victim.getName()));
                     }
+                    event.setCancelled(true);
                 }
             }
         });
