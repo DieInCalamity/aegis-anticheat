@@ -11,7 +11,7 @@ import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
-import org.bukkit.RayTraceResult;
+import org.bukkit.util.RayTraceResult;
 
 public class RayCastCheck extends CheckBase {
 
