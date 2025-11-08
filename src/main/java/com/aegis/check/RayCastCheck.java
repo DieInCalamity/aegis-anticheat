@@ -38,7 +38,6 @@ public class RayCastCheck extends CheckBase {
             public void onPacketReceive(PacketReceiveEvent event) {
                 if (event.getPacketType() != PacketType.Play.Client.INTERACT_ENTITY) return;
                 if (!(event.getPlayer() instanceof Player player)) return;
-
                 if (!Aegis.getInstance().getConfigManager().isCheckEnabled(key)) return;
                 if (Aegis.getInstance().getConfigManager().isExempt(player)) return;
 
@@ -47,7 +46,6 @@ public class RayCastCheck extends CheckBase {
 
                 int targetId = wrapper.getEntityId();
                 Player victim = null;
-
                 for (Player online : player.getWorld().getPlayers()) {
                     if (online.getEntityId() == targetId) {
                         victim = online;
@@ -56,19 +54,15 @@ public class RayCastCheck extends CheckBase {
                 }
                 if (victim == null) return;
 
-                Location victimLoc = victim.getLocation();
-                Vector victimVelocity = victim.getVelocity();
-                double victimHeight = victim.getHeight() > 0 ? victim.getHeight() : 1.8;
-
-                Vector predictedCenter = victimLoc.toVector()
-                        .add(victimVelocity.clone().multiply(predictionFactor))
-                        .add(new Vector(0, victimHeight / 2.0, 0));
+                Vector predictedCenter = victim.getLocation().toVector()
+                        .add(victim.getVelocity().clone().multiply(predictionFactor))
+                        .add(new Vector(0, (victim.getHeight() > 0 ? victim.getHeight() : 1.8) / 2.0, 0));
 
                 Vector attackerEyes = player.getEyeLocation().toVector();
-                Vector dir = predictedCenter.clone().subtract(attackerEyes);
-                double distance = dir.length();
-                if (distance < 1e-6) return;
-                Vector dirNorm = dir.clone().normalize();
+                Vector direction = predictedCenter.clone().subtract(attackerEyes);
+                double distance = direction.length();
+                if (distance <= 1e-6) return;
+                Vector dirNorm = direction.clone().normalize();
 
                 if (distance <= maxReach + leniency) return;
 
@@ -80,14 +74,10 @@ public class RayCastCheck extends CheckBase {
                         FluidCollisionMode.NEVER
                 );
 
-                boolean obstructed = false;
                 if (blockHit != null && blockHit.getHitPosition() != null) {
                     double blockDist = blockHit.getHitPosition().toVector().distance(attackerEyes);
-                    if (blockDist < distance - 1e-6) {
-                        obstructed = true;
-                    }
+                    if (blockDist < distance - 1e-6) return;
                 }
-                if (obstructed) return;
 
                 RayTraceResult entityHit = player.getWorld().rayTraceEntities(
                         startLoc,
@@ -97,19 +87,16 @@ public class RayCastCheck extends CheckBase {
                         e -> e.getEntityId() == victim.getEntityId()
                 );
 
-                boolean hitVictim = entityHit != null &&
-                                     entityHit.getHitEntity() != null &&
-                                     entityHit.getHitEntity().getEntityId() == victim.getEntityId();
+                boolean hitVictim = (entityHit != null && entityHit.getHitEntity() != null
+                        && entityHit.getHitEntity().getEntityId() == victim.getEntityId());
 
                 if (!hitVictim) {
                     if (!player.hasLineOfSight(victim)) {
-                        fail(player,
-                             String.format("reach=%.2f max=%.2f leniency=%.2f victim=%s",
-                                           distance, maxReach, leniency, victim.getName()));
+                        fail(player, String.format("reach=%.2f max=%.2f leniency=%.2f victim=%s",
+                                distance, maxReach, leniency, victim.getName()));
                     } else {
-                        fail(player,
-                             String.format("reach=%.2f max=%.2f leniency=%.2f victim=%s (lineOfSight)",
-                                           distance, maxReach, leniency, victim.getName()));
+                        fail(player, String.format("reach=%.2f max=%.2f leniency=%.2f victim=%s (lineOfSight)",
+                                distance, maxReach, leniency, victim.getName()));
                     }
                     event.setCancelled(true);
                 }
