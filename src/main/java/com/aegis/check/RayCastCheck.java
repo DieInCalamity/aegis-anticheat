@@ -8,7 +8,6 @@ import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
 import org.bukkit.FluidCollisionMode;
 import org.bukkit.Location;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 import org.bukkit.util.RayTraceResult;
@@ -92,7 +91,7 @@ public class RayCastCheck extends CheckBase {
                 boolean hitVictim = entityHit != null && entityHit.getHitEntity() != null
                         && entityHit.getHitEntity().getEntityId() == victim.getEntityId();
 
-                if (hitVictim || !hitVictim) {
+                if (!hitVictim) {
                     if (!player.hasLineOfSight(victim)) {
                         fail(player, String.format("reach=%.2f max=%.2f leniency=%.2f victim=%s",
                                 distance, maxReach, leniency, victim.getName()));
