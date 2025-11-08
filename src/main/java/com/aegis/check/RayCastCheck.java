@@ -18,6 +18,7 @@ public class RayCastCheck extends CheckBase {
     private final double predictionFactor;
     private final double leniency;
     private final double rayEntitySize;
+    private final double maxAllowed;
 
     public RayCastCheck() {
         super("raycast");
@@ -29,6 +30,7 @@ public class RayCastCheck extends CheckBase {
                 .getDouble("checks.raycast.leniency", 0.25);
         this.rayEntitySize = Aegis.getInstance().getConfigManager()
                 .getDouble("checks.raycast.ray_entity_size", 0.6);
+        this.maxAllowed = this.maxReach + this.leniency;
         registerPacketListener();
     }
 
@@ -45,6 +47,7 @@ public class RayCastCheck extends CheckBase {
                 if (wrapper.getAction() != WrapperPlayClientInteractEntity.InteractAction.ATTACK) return;
 
                 int targetId = wrapper.getEntityId();
+
                 Player victim = null;
                 for (Player online : player.getWorld().getPlayers()) {
                     if (online.getEntityId() == targetId) {
@@ -53,10 +56,13 @@ public class RayCastCheck extends CheckBase {
                     }
                 }
                 if (victim == null) return;
+                if (!player.getWorld().equals(victim.getWorld())) return;
 
+                Vector victimVel = victim.getVelocity();
+                double victimHeight = victim.getHeight() > 0 ? victim.getHeight() : 1.8;
                 Vector predictedCenter = victim.getLocation().toVector()
-                        .add(victim.getVelocity().clone().multiply(predictionFactor))
-                        .add(new Vector(0, (victim.getHeight() > 0 ? victim.getHeight() : 1.8) / 2.0, 0));
+                        .add(victimVel.clone().multiply(predictionFactor))
+                        .add(new Vector(0, victimHeight / 2.0, 0));
 
                 Vector attackerEyes = player.getEyeLocation().toVector();
                 Vector direction = predictedCenter.clone().subtract(attackerEyes);
@@ -64,7 +70,7 @@ public class RayCastCheck extends CheckBase {
                 if (distance <= 1e-6) return;
                 Vector dirNorm = direction.clone().normalize();
 
-                if (distance <= maxReach + leniency) return;
+                if (distance <= maxAllowed) return;
 
                 Location startLoc = player.getEyeLocation();
                 RayTraceResult blockHit = player.getWorld().rayTraceBlocks(
@@ -79,16 +85,17 @@ public class RayCastCheck extends CheckBase {
                     if (blockDist < distance - 1e-6) return;
                 }
 
+                final int victimId = victim.getEntityId();
                 RayTraceResult entityHit = player.getWorld().rayTraceEntities(
                         startLoc,
                         dirNorm,
                         distance,
                         rayEntitySize,
-                        e -> e.getEntityId() == victim.getEntityId()
+                        e -> e.getEntityId() == victimId
                 );
 
-                boolean hitVictim = (entityHit != null && entityHit.getHitEntity() != null
-                        && entityHit.getHitEntity().getEntityId() == victim.getEntityId());
+                boolean hitVictim = entityHit != null && entityHit.getHitEntity() != null
+                        && entityHit.getHitEntity().getEntityId() == victimId;
 
                 if (!hitVictim) {
                     if (!player.hasLineOfSight(victim)) {
