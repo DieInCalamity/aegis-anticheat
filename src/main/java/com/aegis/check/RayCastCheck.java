@@ -75,7 +75,7 @@ public class RayCastCheck extends CheckBase {
                 );
 
                 if (blockHit != null && blockHit.getHitPosition() != null) {
-                    double blockDist = blockHit.getHitPosition().toVector().distance(attackerEyes);
+                    double blockDist = blockHit.getHitPosition().distance(attackerEyes);
                     if (blockDist < distance - 1e-6) return;
                 }
 
