@@ -6,7 +6,7 @@ import org.bukkit.entity.Player;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
-import com.github.retrooper.packetevents.protocol.packettype.PacketTypeCommon;
+import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientClickWindow;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientCloseWindow;
@@ -47,9 +47,9 @@ public class InventoryCheck extends CheckBase {
                 if (!cfg.isCheckEnabled(key)) return;
                 if (cfg.isExempt(p)) return;
 
-                PacketTypeCommon type = event.getPacketType();
+                PacketType type = event.getPacketType();
 
-                if (type == PacketTypeCommon.Play.Client.CLICK_WINDOW) {
+                if (type == PacketType.Play.Client.CLICK_WINDOW) {
                     WrapperPlayClientClickWindow wrapper = new WrapperPlayClientClickWindow(event);
 
                     guiOpenMap.put(p, true);
@@ -81,7 +81,7 @@ public class InventoryCheck extends CheckBase {
                     }
                 }
 
-                if (type == PacketTypeCommon.Play.Client.CLOSE_WINDOW) {
+                if (type == PacketType.Play.Client.CLOSE_WINDOW) {
                     WrapperPlayClientCloseWindow wrapper = new WrapperPlayClientCloseWindow(event);
                     guiOpenMap.put(p, false);
 
@@ -95,15 +95,15 @@ public class InventoryCheck extends CheckBase {
                     return;
                 }
 
-                if (type == PacketTypeCommon.Play.Client.PICK_ITEM) {
+                if (type == PacketType.Play.Client.PICK_ITEM) {
                     picking = true;
                 }
 
-                if ((type == PacketTypeCommon.Play.Client.USE_ITEM
-                        || type == PacketTypeCommon.Play.Client.PLAYER_DIGGING)
+                if ((type == PacketType.Play.Client.USE_ITEM
+                        || type == PacketType.Play.Client.PLAYER_DIGGING)
                         && picking) {
 
-                    String action = (type == PacketTypeCommon.Play.Client.PLAYER_DIGGING)
+                    String action = (type == PacketType.Play.Client.PLAYER_DIGGING)
                             ? new WrapperPlayClientPlayerDigging(event).getAction().name()
                             : "use item";
 
@@ -113,7 +113,7 @@ public class InventoryCheck extends CheckBase {
                 }
 
                 if (cfg.getBoolean("checks.inventory.detect_attack_with_inventory", true)
-                        && type == PacketTypeCommon.Play.Client.INTERACT_ENTITY) {
+                        && type == PacketType.Play.Client.INTERACT_ENTITY) {
 
                     WrapperPlayClientInteractEntity wrapper = new WrapperPlayClientInteractEntity(event);
                     if (wrapper.getAction() == WrapperPlayClientInteractEntity.InteractAction.ATTACK) {
