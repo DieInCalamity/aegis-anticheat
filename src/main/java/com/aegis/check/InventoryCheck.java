@@ -5,6 +5,7 @@ import org.bukkit.entity.Player;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
+import com.github.retrooper.packetevents.protocol.packettype.PacketTypeCommon;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientClickWindow;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientCloseWindow;
@@ -40,7 +41,7 @@ public class InventoryCheck extends CheckBase {
                 if (!cfg.isCheckEnabled(key)) return;
                 if (cfg.isExempt(p)) return;
 
-                PacketType type = event.getPacketType();
+                PacketTypeCommon type = event.getPacketType();
 
                 if (type == PacketType.Play.Client.CLICK_WINDOW) {
                     WrapperPlayClientClickWindow wrapper = new WrapperPlayClientClickWindow(event);
@@ -89,6 +90,7 @@ public class InventoryCheck extends CheckBase {
 
                 if (type == PacketType.Play.Client.PICK_ITEM) {
                     picking = true;
+                    return;
                 }
 
                 if ((type == PacketType.Play.Client.USE_ITEM
@@ -99,7 +101,6 @@ public class InventoryCheck extends CheckBase {
                             : "use item";
                     fail(p, "instant action type=" + action);
                     event.setCancelled(true);
-                    return;
                 }
             }
         });
