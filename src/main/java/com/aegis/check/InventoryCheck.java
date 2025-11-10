@@ -6,13 +6,12 @@ import org.bukkit.entity.Player;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
-import com.github.retrooper.packetevents.protocol.packettype.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientClickWindow;
-import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientCloseWindow;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPickItem;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientUseItem;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerDigging;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
 import com.github.retrooper.packetevents.protocol.item.ItemStack;
 
 import java.util.Map;
@@ -47,11 +46,8 @@ public class InventoryCheck extends CheckBase {
                 if (!cfg.isCheckEnabled(key)) return;
                 if (cfg.isExempt(p)) return;
 
-                PacketType type = event.getPacketType();
-
-                if (type == PacketType.Play.Client.CLICK_WINDOW) {
+                if (event.getWrapper() instanceof WrapperPlayClientClickWindow) {
                     WrapperPlayClientClickWindow wrapper = new WrapperPlayClientClickWindow(event);
-
                     guiOpenMap.put(p, true);
 
                     if (cfg.getBoolean("checks.inventory.detect_sprint_inventory", true)
@@ -80,8 +76,7 @@ public class InventoryCheck extends CheckBase {
                         return;
                     }
                 }
-
-                if (type == PacketType.Play.Client.CLOSE_WINDOW) {
+                else if (event.getWrapper() instanceof WrapperPlayClientCloseWindow) {
                     WrapperPlayClientCloseWindow wrapper = new WrapperPlayClientCloseWindow(event);
                     guiOpenMap.put(p, false);
 
@@ -94,27 +89,22 @@ public class InventoryCheck extends CheckBase {
                     }
                     return;
                 }
-
-                if (type == PacketType.Play.Client.PICK_ITEM) {
+                else if (event.getWrapper() instanceof WrapperPlayClientPickItem) {
                     picking = true;
                 }
-
-                if ((type == PacketType.Play.Client.USE_ITEM
-                        || type == PacketType.Play.Client.PLAYER_DIGGING)
-                        && picking) {
-
-                    String action = (type == PacketType.Play.Client.PLAYER_DIGGING)
-                            ? new WrapperPlayClientPlayerDigging(event).getAction().name()
+                else if ((event.getWrapper() instanceof WrapperPlayClientUseItem
+                          || event.getWrapper() instanceof WrapperPlayClientPlayerDigging)
+                         && picking) {
+                    String action = (event.getWrapper() instanceof WrapperPlayClientPlayerDigging)
+                            ? ((WrapperPlayClientPlayerDigging) event.getWrapper()).getAction().name()
                             : "use item";
 
                     fail(p, "instant action type=" + action);
                     event.setCancelled(true);
                     return;
                 }
-
-                if (cfg.getBoolean("checks.inventory.detect_attack_with_inventory", true)
-                        && type == PacketType.Play.Client.INTERACT_ENTITY) {
-
+                else if (cfg.getBoolean("checks.inventory.detect_attack_with_inventory", true)
+                         && event.getWrapper() instanceof WrapperPlayClientInteractEntity) {
                     WrapperPlayClientInteractEntity wrapper = new WrapperPlayClientInteractEntity(event);
                     if (wrapper.getAction() == WrapperPlayClientInteractEntity.InteractAction.ATTACK) {
                         Boolean guiOpen = guiOpenMap.getOrDefault(p, false);
@@ -125,7 +115,6 @@ public class InventoryCheck extends CheckBase {
                         }
                     }
                 }
-
             }
         });
     }
