@@ -49,7 +49,7 @@ public class Aegis extends JavaPlugin implements Listener {
         registerCheck(new BalanceCheck());
         registerCheck(new NoSlowCheck());
         new RayCastCheck();
-        # registerCheck(new FastBreakCheck());
+        // registerCheck(new FastBreakCheck());
         registerCheck(new AutoClickerCheck());
         registerCheck(new ChatCheck());
         new BadPacketsCheck();
