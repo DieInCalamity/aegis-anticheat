@@ -97,7 +97,6 @@ checks:
     enabled: true
     detect_sprint_inventory: true
     detect_instant_click: true
-    detect_attack_with_inventory: true
     detect_fast_close: true
     setback_vl: -1
     commands:
