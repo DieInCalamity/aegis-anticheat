@@ -6,7 +6,7 @@
 
 * Detects movement cheats (fly, speed, spider, noslow, highjump)
 * Blocks combat hacks (reach, hitboxes, autoclicker)
-* Prevents exploit abuse (fastbreak, timer, groundspoof, inventory, chat, badpackets)
+* Prevents exploit abuse (fastbreak, fastplace, timer, groundspoof, inventory, chat, badpackets)
 * Configurable punishments: warnings, kicks, bans
 * Lightweight design with minimal impact on TPS and player experience
 * Fully configurable using `config.yml`
