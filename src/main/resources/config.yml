@@ -112,3 +112,12 @@ checks:
     setback_vl: -1
     commands:
       5: 'kick %player% Inventory Exploit'
+
+  fastplace:
+    enabled: true
+    min_delay_ms: 60   # minimum delay between blocks (60ms = very permissive)
+    max_burst: 20      # maximum number of blocks in 1s before flagging 
+    setback_vl: 0
+    commands:
+      15: 'kick %player% FastPlace'
+
