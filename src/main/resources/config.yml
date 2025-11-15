@@ -57,6 +57,7 @@ checks:
     base_speed: 0.7
     items:
       min_slow_percent: 0.6 # set to 0 to disable
+      grace_ticks: 5 # set to 0 to disable(not recommended)
     sneak:
       min_slow_percent: 0.3 # set to 0 to disable
       grace_ticks: 5 # set to 0 to disable(not recommended)
@@ -64,8 +65,8 @@ checks:
     commands:
       15: 'kick %player% NoSlow'
 
-  raycast:
-    enabled: true
+  raycast: # does not work currently
+    enabled: false
     max_reach: 3.2
     prediction_factor: 0.45
     leniency: 0.25
@@ -74,15 +75,15 @@ checks:
     commands:
       15: 'kick %player% Reach/HitBox'
 
-  fastbreak:
-    enabled: true
+  fastbreak: # very bad check
+    enabled: false
     min_interval_ms: 120 # minimum time between block breaks
     setback_vl: 10
     commands:
       30: 'kick %player% FastBreak'
 
-  autoclicker:
-    enabled: true
+  autoclicker: # very bad check
+    enabled: false
     cps_threshold: 16
     setback_vl: -1
     commands:
@@ -120,4 +121,3 @@ checks:
     setback_vl: 0
     commands:
       15: 'kick %player% FastPlace'
-
