@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.aegis</groupId>
     <artifactId>aegis-anticheat</artifactId>
-    <version>${git.commit.id.abbrev}</version>
+    <version>0.0.0-PLACEHOLDER</version>
     <name>Aegis</name>
     <description>Aegis AntiCheat for Paper/Spigot 1.21+</description>
     <properties>
@@ -63,13 +63,13 @@
                         <goals>
                             <goal>revision</goal>
                         </goals>
+                        <configuration>
+                            <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                            <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
+                            <commitIdGenerationMode>abbrev</commitIdGenerationMode>
+                        </configuration>
                     </execution>
                 </executions>
-                <configuration>
-                    <generateGitPropertiesFile>true</generateGitPropertiesFile>
-                    <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
-                    <commitIdGenerationMode>abbrev</commitIdGenerationMode>
-                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
