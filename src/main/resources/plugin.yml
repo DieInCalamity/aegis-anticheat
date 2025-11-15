@@ -1,6 +1,6 @@
 name: Aegis
 main: com.aegis.Aegis
-version: 1.0.1-dev5
+version: ${project.version}-${git.commit.id.abbrev}
 api-version: '1.21'
 author: CalamityCats
 website: https://modrinth.com/
