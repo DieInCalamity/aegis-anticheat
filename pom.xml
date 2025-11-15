@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.aegis</groupId>
     <artifactId>aegis-anticheat</artifactId>
-    <version>1.0.1-dev5</version>
+    <version>${git.commit.id.abbrev}</version>
     <name>Aegis</name>
     <description>Aegis AntiCheat for Paper/Spigot 1.21+</description>
     <properties>
@@ -45,6 +45,12 @@
     </dependencies>
     <build>
         <finalName>${project.artifactId}-${project.version}-${git.commit.id.abbrev}</finalName>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
         <plugins>
             <plugin>
                 <groupId>io.github.git-commit-id</groupId>
@@ -62,7 +68,7 @@
                 <configuration>
                     <generateGitPropertiesFile>true</generateGitPropertiesFile>
                     <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
-                    <commitIdGenerationMode>full</commitIdGenerationMode>
+                    <commitIdGenerationMode>abbrev</commitIdGenerationMode>
                 </configuration>
             </plugin>
             <plugin>
@@ -92,11 +98,5 @@
                 </executions>
             </plugin>
         </plugins>
-        <resources>
-            <resource>
-                <directory>src/main/resources</directory>
-                <filtering>false</filtering>
-            </resource>
-        </resources>
     </build>
 </project>
