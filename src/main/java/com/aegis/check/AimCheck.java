@@ -5,7 +5,8 @@ import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
 import com.github.retrooper.packetevents.protocol.packettype.PacketType;
-import com.github.retrooper.packetevents.wrapper.play.client.*;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerRotation;
+import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerPositionAndRotation;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -33,20 +34,20 @@ public class AimCheck extends CheckBase {
 
                 UUID uuid = player.getUniqueId();
                 RotData d = get(uuid);
-                PacketType type = event.getPacketType();
+                PacketType.Play.Client type = (PacketType.Play.Client) event.getPacketType();
 
-                if (type == PacketType.Play.Client.ARM_ANIMATION) {
+                if (type == PacketType.Play.Client.ANIMATION) {
                     d.lastAttack = System.currentTimeMillis();
                     d.wasAttackThisTick = true;
                 }
 
-                if (type == PacketType.Play.Client.LOOK) {
-                    WrapperPlayClientLook w = new WrapperPlayClientLook(event);
+                if (type == PacketType.Play.Client.PLAYER_ROTATION) {
+                    WrapperPlayClientPlayerRotation w = new WrapperPlayClientPlayerRotation(event);
                     handle(player, d, w.getYaw(), w.getPitch());
                 }
 
-                if (type == PacketType.Play.Client.POSITION_LOOK) {
-                    WrapperPlayClientPositionLook w = new WrapperPlayClientPositionLook(event);
+                if (type == PacketType.Play.Client.PLAYER_POSITION_AND_ROTATION) {
+                    WrapperPlayClientPlayerPositionAndRotation w = new WrapperPlayClientPlayerPositionAndRotation(event);
                     handle(player, d, w.getYaw(), w.getPitch());
                 }
             }
