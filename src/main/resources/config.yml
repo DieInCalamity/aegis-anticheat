@@ -121,3 +121,23 @@ checks:
     setback_vl: 0
     commands:
       15: 'kick %player% FastPlace'
+
+  aimcheck:
+    enabled: true
+    max-yaw-change: 35.0
+    max-pitch-change: 35.0
+    combined-threshold: 10.0
+    min-delta: 0.1
+    pre-attack-time: 180
+    post-attack-time: 250
+    post-ticks-threshold: 2
+    detect-pre-attack: true
+    detect-post-attack: true
+    buffer-size: 3
+    violations-to-alert: 2
+    violation-reset-time: 5000
+    reset-on-teleport: true
+    exempt-creative: false
+    setback_vl: 10
+    commands:
+      20: 'kick %player% Aim Assist'
