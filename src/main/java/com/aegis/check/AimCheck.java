@@ -4,7 +4,7 @@ import com.aegis.Aegis;
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.event.PacketListenerAbstract;
 import com.github.retrooper.packetevents.event.PacketReceiveEvent;
-import com.github.retrooper.packetevents.protocol.packettype.PacketType;
+import com.github.retrooper.packettypes.PacketType;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerRotation;
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientPlayerPositionAndRotation;
 import org.bukkit.entity.Player;
@@ -58,8 +58,11 @@ public class AimCheck extends CheckBase {
         double maxYawChange = Aegis.getInstance().getConfigManager().getDouble("checks.aimcheck.max-yaw-change", 35.0);
         double maxPitchChange = Aegis.getInstance().getConfigManager().getDouble("checks.aimcheck.max-pitch-change", 35.0);
         double combinedThreshold = Aegis.getInstance().getConfigManager().getDouble("checks.aimcheck.combined-threshold", 10.0);
-        long preAttackTime = Aegis.getInstance().getConfigManager().getLong("checks.aimcheck.pre-attack-time", 180L);
-        long postAttackTime = Aegis.getInstance().getConfigManager().getLong("checks.aimcheck.post-attack-time", 250L);
+        
+        long preAttackTime = (long) Aegis.getInstance().getConfigManager().getInt("checks.aimcheck.pre-attack-time", 180);
+        long postAttackTime = (long) Aegis.getInstance().getConfigManager().getInt("checks.aimcheck.post-attack-time", 250);
+        long violationResetTime = (long) Aegis.getInstance().getConfigManager().getInt("checks.aimcheck.violation-reset-time", 5000);
+        
         int bufferSize = Aegis.getInstance().getConfigManager().getInt("checks.aimcheck.buffer-size", 3);
         int postTicksThreshold = Aegis.getInstance().getConfigManager().getInt("checks.aimcheck.post-ticks-threshold", 2);
         boolean detectPreAttack = Aegis.getInstance().getConfigManager().getBoolean("checks.aimcheck.detect-pre-attack", true);
@@ -68,7 +71,6 @@ public class AimCheck extends CheckBase {
         boolean resetOnTeleport = Aegis.getInstance().getConfigManager().getBoolean("checks.aimcheck.reset-on-teleport", true);
         boolean exemptCreative = Aegis.getInstance().getConfigManager().getBoolean("checks.aimcheck.exempt-creative", true);
         int violationsToAlert = Aegis.getInstance().getConfigManager().getInt("checks.aimcheck.violations-to-alert", 2);
-        long violationResetTime = Aegis.getInstance().getConfigManager().getLong("checks.aimcheck.violation-reset-time", 5000L);
 
         if (exemptCreative && p.getGameMode() == org.bukkit.GameMode.CREATIVE) {
             return;
@@ -100,7 +102,6 @@ public class AimCheck extends CheckBase {
                 }
             }
         }
-
         if (detectPostAttack) {
             if (d.wasAttackThisTick) {
                 d.postTicks = 0;
