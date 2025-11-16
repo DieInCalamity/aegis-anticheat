@@ -55,6 +55,7 @@ public class Aegis extends JavaPlugin implements Listener {
         registerCheck(new ChatCheck());
         new BadPacketsCheck();
         new InventoryCheck();
+        new AimCheck();
 
         setupPacketEvents();
 
