@@ -7,6 +7,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.Material;
 
 import java.util.Collection;
 
@@ -21,6 +24,12 @@ public class HorizontalMotionCheck extends CheckBase implements Listener {
         Player p = e.getPlayer();
         if (Aegis.getInstance().getConfigManager().isExempt(p)) return;
         if (e.getTo() == null) return;
+        
+        boolean ignoreSpear = Aegis.getInstance().getConfigManager()
+            .getBoolean("checks.horizontalmotion.ignore_spear_holders", false);
+        if (ignoreSpear && hasSpear(p)) {
+            return;
+        }
 
         double dx = e.getTo().getX() - e.getFrom().getX();
         double dz = e.getTo().getZ() - e.getFrom().getZ();
@@ -38,6 +47,41 @@ public class HorizontalMotionCheck extends CheckBase implements Listener {
             fail(p, String.format("speed=%.3f max=%.2f", speed, max));
         }
     }
+    
+    private boolean hasSpear(Player player) {
+        PlayerInventory inv = player.getInventory();
+        
+        ItemStack mainHand = inv.getItemInMainHand();
+        if (isSpearItem(mainHand)) {
+            return true;
+        }
+        
+        ItemStack offHand = inv.getItemInOffHand();
+        if (isSpearItem(offHand)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    private boolean isSpearItem(ItemStack item) {
+        if (item == null || item.getType() == Material.AIR) {
+            return false;
+        }
+        
+        String itemName = item.getType().name().toLowerCase();
+        
+        if (itemName.endsWith("_spear")) {
+            try {
+                Material material = item.getType();
+                return true;
+            } catch (IllegalArgumentException e) {
+                return false;
+            }
+        }
+        return false;
+    }
+    
     private boolean isPushedByEntity(Player p, double expand) {
         Collection<Entity> nearby = p.getWorld().getNearbyEntities(p.getBoundingBox().expand(expand));
         return false;
