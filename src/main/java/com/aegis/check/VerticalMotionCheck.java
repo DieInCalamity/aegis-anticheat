@@ -26,15 +26,15 @@ public class VerticalMotionCheck extends CheckBase implements Listener {
         super("verticalmotion");
     }
 
-    boolean ignoreSpear = Aegis.getInstance().getConfigManager()
-        .getBoolean("checks.verticalmotion.ignore_spear_holders", false);
-
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
         if (!Aegis.getInstance().getConfigManager().isCheckEnabled(key)) return;
         Player p = e.getPlayer();
         if (Aegis.getInstance().getConfigManager().isExempt(p)) return;
         if (e.getTo() == null) return;
+
+        boolean ignoreSpear = Aegis.getInstance().getConfigManager()
+            .getBoolean("checks.verticalmotion.ignore_spear_holders", false);
 
         UUID uuid = p.getUniqueId();
 
