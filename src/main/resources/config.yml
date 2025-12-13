@@ -26,6 +26,7 @@ checks:
     max_speed: 0.9 # blocks/tick cap for legit sprint+jump on flat ground is ~0.7-0.8 depending on tickrate
     ignore_push: true # ignore push from other entities
     push_expand: 0.3  # hitbox radius for push
+    ignore_spear_holders: true # ignore players that have spear in hand (temp fix for spear false positivies)
     setback_vl: 10
     commands:
       50: 'kick %player% Horizontal Motion'
@@ -41,6 +42,7 @@ checks:
     airwalk_dy_threshold: 0.001    # Threshold for detecting AirWalk (staying suspended)
     air_ticks_min: 5                # Minimum number of air ticks before Fly/AirWalk check triggers
     groundspoof_max_distance: 1.0  # Max distance from block below player for GroundSpoof check
+    ignore_spear_holders: true # ignore players that have spear in hand (temp fix for spear false positivies)
     setback_vl: 10
     commands:
       30: 'kick %player% Vertical Motion'
