@@ -26,6 +26,9 @@ public class VerticalMotionCheck extends CheckBase implements Listener {
         super("verticalmotion");
     }
 
+    boolean ignoreSpear = Aegis.getInstance().getConfigManager()
+        .getBoolean("checks.verticalmotion.ignore_spear_holders", false);
+
     @EventHandler
     public void onMove(PlayerMoveEvent e) {
         if (!Aegis.getInstance().getConfigManager().isCheckEnabled(key)) return;
@@ -159,11 +162,12 @@ public class VerticalMotionCheck extends CheckBase implements Listener {
 
             double horizontalSpeed = Math.sqrt(vel.getX()*vel.getX() + vel.getZ()*vel.getZ());
             if (horizontalSpeed > 0.6 && dy >= -0.03) {
-                if (ignoreSpear && hasSpear(p)) {
-                    return;
+                if (ignoreSpear && HorizontalMotionCheck.hasSpear(p)) {
+                    // skip
+                } else {
+                    fail(p, String.format("horizontal fly detected: speed=%.3f dy=%.3f", horizontalSpeed, dy));
+                    history.clear();
                 }
-                fail(p, String.format("horizontal fly detected: speed=%.3f dy=%.3f", horizontalSpeed, dy));
-                history.clear();
             }
 
         } else {
