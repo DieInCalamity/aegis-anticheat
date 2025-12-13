@@ -64,7 +64,7 @@ public class HorizontalMotionCheck extends CheckBase implements Listener {
         return false;
     }
     
-    private boolean isSpearItem(ItemStack item) {
+    private static boolean isSpearItem(ItemStack item) {
         if (item == null || item.getType() == Material.AIR) {
             return false;
         }
