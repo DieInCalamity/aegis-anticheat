@@ -48,7 +48,7 @@ public class HorizontalMotionCheck extends CheckBase implements Listener {
         }
     }
     
-    public boolean hasSpear(Player player) {
+    public static boolean hasSpear(Player player) {
         PlayerInventory inv = player.getInventory();
         
         ItemStack mainHand = inv.getItemInMainHand();
