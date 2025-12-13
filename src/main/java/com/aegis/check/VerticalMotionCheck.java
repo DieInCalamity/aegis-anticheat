@@ -11,6 +11,7 @@ import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerTeleportEvent;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.Vector;
+import com.aegis.check.HorizontalMotionCheck;
 
 import java.util.*;
 
@@ -158,6 +159,9 @@ public class VerticalMotionCheck extends CheckBase implements Listener {
 
             double horizontalSpeed = Math.sqrt(vel.getX()*vel.getX() + vel.getZ()*vel.getZ());
             if (horizontalSpeed > 0.6 && dy >= -0.03) {
+                if (ignoreSpear && hasSpear(p)) {
+                    return;
+                }
                 fail(p, String.format("horizontal fly detected: speed=%.3f dy=%.3f", horizontalSpeed, dy));
                 history.clear();
             }
